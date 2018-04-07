@@ -7,16 +7,19 @@ import akka.actor.{Actor, Props}
 import scala.concurrent.duration._
 
 /**
- * Work executor is the actor actually performing the work.
- */
+  * Work executor is the actor actually performing the work.
+  */
 object WorkExecutor {
   def props = Props(new WorkExecutor)
 
   case class DoWork(n: Int)
+
   case class WorkComplete(result: String)
+
 }
 
 class WorkExecutor extends Actor {
+
   import WorkExecutor._
   import context.dispatcher
 

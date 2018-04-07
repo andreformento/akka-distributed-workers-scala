@@ -18,7 +18,8 @@ import scala.concurrent.{Await, Future}
 
 object DistributedWorkerSpec {
 
-  val clusterConfig = ConfigFactory.parseString("""
+  val clusterConfig = ConfigFactory.parseString(
+    """
     akka {
       persistence {
         journal.plugin = "akka.persistence.journal.inmem"
@@ -89,14 +90,15 @@ object DistributedWorkerSpec {
       }
     }
   }
+
 }
 
 class DistributedWorkerSpec(_system: ActorSystem)
   extends TestKit(_system)
-  with Matchers
-  with FlatSpecLike
-  with BeforeAndAfterAll
-  with ImplicitSender {
+    with Matchers
+    with FlatSpecLike
+    with BeforeAndAfterAll
+    with ImplicitSender {
 
   import DistributedWorkerSpec._
 

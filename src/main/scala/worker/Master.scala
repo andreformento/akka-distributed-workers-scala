@@ -1,14 +1,14 @@
 package worker
 
-import akka.actor.{ActorLogging, ActorRef, Cancellable, Props, Timers}
+import akka.actor.{ActorLogging, ActorRef, Props, Timers}
 import akka.cluster.pubsub.{DistributedPubSub, DistributedPubSubMediator}
 import akka.persistence.{PersistentActor, RecoveryCompleted, SnapshotOffer}
 
 import scala.concurrent.duration.{Deadline, FiniteDuration, _}
 
 /**
- * The master actor keep tracks of all available workers, and all scheduled and ongoing work items
- */
+  * The master actor keep tracks of all available workers, and all scheduled and ongoing work items
+  */
 object Master {
 
   val ResultsTopic = "results"
@@ -19,8 +19,11 @@ object Master {
   case class Ack(workId: String)
 
   private sealed trait WorkerStatus
+
   private case object Idle extends WorkerStatus
+
   private case class Busy(workId: String, deadline: Deadline) extends WorkerStatus
+
   private case class WorkerState(ref: ActorRef, status: WorkerStatus, staleWorkerDeadline: Deadline)
 
   private case object CleanupTick
@@ -28,14 +31,15 @@ object Master {
 }
 
 class Master(workTimeout: FiniteDuration) extends PersistentActor with Timers with ActorLogging {
+
   import Master._
   import WorkState._
-  import context.dispatcher
 
   override val persistenceId: String = "master"
 
   val considerWorkerDeadAfter: FiniteDuration =
     context.system.settings.config.getDuration("distributed-workers.consider-worker-dead-after").getSeconds.seconds
+
   def newStaleWorkerDeadline(): Deadline = considerWorkerDeadAfter.fromNow
 
   timers.startPeriodicTimer("cleanup", CleanupTick, workTimeout / 2)
@@ -103,7 +107,7 @@ class Master(workTimeout: FiniteDuration) extends PersistentActor with Timers wi
     case MasterWorkerProtocol.WorkerRequestsWork(workerId) =>
       if (workState.hasWork) {
         workers.get(workerId) match {
-          case Some(workerState @ WorkerState(_, Idle, _)) =>
+          case Some(workerState@WorkerState(_, Idle, _)) =>
             val work = workState.nextWork
             persist(WorkStarted(work.workId)) { event =>
               workState = workState.updated(event)
@@ -187,17 +191,17 @@ class Master(workTimeout: FiniteDuration) extends PersistentActor with Timers wi
     if (workState.hasWork) {
       workers.foreach {
         case (_, WorkerState(ref, Idle, _)) => ref ! MasterWorkerProtocol.WorkIsReady
-        case _                           => // busy
+        case _ => // busy
       }
     }
 
   def changeWorkerToIdle(workerId: String, workId: String): Unit =
     workers.get(workerId) match {
-      case Some(workerState @ WorkerState(_, Busy(`workId`, _), _)) ⇒
+      case Some(workerState@WorkerState(_, Busy(`workId`, _), _)) ⇒
         val newWorkerState = workerState.copy(status = Idle, staleWorkerDeadline = newStaleWorkerDeadline())
         workers += (workerId -> newWorkerState)
       case _ ⇒
-        // ok, might happen after standby recovery, worker state is not persisted
+      // ok, might happen after standby recovery, worker state is not persisted
     }
 
   def tooLongSinceHeardFrom(lastHeardFrom: Long) =

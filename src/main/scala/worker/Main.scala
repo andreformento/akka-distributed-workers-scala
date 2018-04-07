@@ -50,28 +50,29 @@ object Main {
   }
 
   /**
-   * Start a node with the role backend on the given port. (This may also
-   * start the shared journal, see below for details)
-   */
+    * Start a node with the role backend on the given port. (This may also
+    * start the shared journal, see below for details)
+    */
   def startBackEnd(port: Int): Unit = {
     val system = ActorSystem("ClusterSystem", config(port, "back-end"))
     MasterSingleton.startSingleton(system)
   }
 
   /**
-   * Start a front end node that will submit work to the backend nodes
-   */
+    * Start a front end node that will submit work to the backend nodes
+    */
   // #front-end
   def startFrontEnd(port: Int): Unit = {
     val system = ActorSystem("ClusterSystem", config(port, "front-end"))
     system.actorOf(FrontEnd.props, "front-end")
     system.actorOf(WorkResultConsumer.props, "consumer")
   }
+
   // #front-end
 
   /**
-   * Start a worker node, with n actual workers that will accept and process workloads
-   */
+    * Start a worker node, with n actual workers that will accept and process workloads
+    */
   // #worker
   def startWorker(port: Int, workers: Int): Unit = {
     val system = ActorSystem("ClusterSystem", config(port, "worker"))
@@ -83,19 +84,21 @@ object Main {
       system.actorOf(Worker.props(masterProxy), s"worker-$n")
     )
   }
+
   // #worker
 
   def config(port: Int, role: String): Config =
-    ConfigFactory.parseString(s"""
+    ConfigFactory.parseString(
+      s"""
       akka.remote.netty.tcp.port=$port
       akka.cluster.roles=[$role]
     """).withFallback(ConfigFactory.load())
 
   /**
-   * To make the sample easier to run we kickstart a Cassandra instance to
-   * act as the journal. Cassandra is a great choice of backend for Akka Persistence but
-   * in a real application a pre-existing Cassandra cluster should be used.
-   */
+    * To make the sample easier to run we kickstart a Cassandra instance to
+    * act as the journal. Cassandra is a great choice of backend for Akka Persistence but
+    * in a real application a pre-existing Cassandra cluster should be used.
+    */
   def startCassandraDatabase(): Unit = {
     val databaseDirectory = new File("target/cassandra-db")
     CassandraLauncher.start(

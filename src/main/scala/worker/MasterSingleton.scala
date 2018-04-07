@@ -22,11 +22,13 @@ object MasterSingleton {
       ),
       singletonName)
   }
+
   // #singleton
 
   // #proxy
   def proxyProps(system: ActorSystem) = ClusterSingletonProxy.props(
     settings = ClusterSingletonProxySettings(system).withRole(singletonRole),
     singletonManagerPath = s"/user/$singletonName")
+
   // #proxy
 }

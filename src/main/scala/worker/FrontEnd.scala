@@ -3,26 +3,30 @@ package worker
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
-import akka.actor.{Actor, ActorLogging, Cancellable, Props, Timers}
+import akka.actor.{Actor, ActorLogging, Props, Timers}
 import akka.pattern._
 import akka.util.Timeout
 
 import scala.concurrent.duration._
 
 /**
- * Dummy front-end that periodically sends a workload to the master.
- */
+  * Dummy front-end that periodically sends a workload to the master.
+  */
 object FrontEnd {
 
   def props: Props = Props(new FrontEnd)
 
   private case object NotOk
+
   private case object Tick
+
   private case object Retry
+
 }
 
 // #front-end
 class FrontEnd extends Actor with ActorLogging with Timers {
+
   import FrontEnd._
   import context.dispatcher
 
@@ -76,4 +80,5 @@ class FrontEnd extends Actor with ActorLogging with Timers {
   }
 
 }
+
 // #front-end

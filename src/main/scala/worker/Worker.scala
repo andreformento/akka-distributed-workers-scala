@@ -8,9 +8,9 @@ import akka.actor._
 import scala.concurrent.duration._
 
 /**
- * The worker is actually more of a middle manager, delegating the actual work
- * to the WorkExecutor, supervising it and keeping itself available to interact with the work master.
- */
+  * The worker is actually more of a middle manager, delegating the actual work
+  * to the WorkExecutor, supervising it and keeping itself available to interact with the work master.
+  */
 object Worker {
 
   def props(masterProxy: ActorRef): Props = Props(new Worker(masterProxy))
@@ -19,6 +19,7 @@ object Worker {
 
 class Worker(masterProxy: ActorRef)
   extends Actor with Timers with ActorLogging {
+
   import MasterWorkerProtocol._
   import context.dispatcher
 
@@ -31,9 +32,10 @@ class Worker(masterProxy: ActorRef)
   val workExecutor = createWorkExecutor()
 
   var currentWorkId: Option[String] = None
+
   def workId: String = currentWorkId match {
     case Some(workId) => workId
-    case None         => throw new IllegalStateException("Not working")
+    case None => throw new IllegalStateException("Not working")
   }
 
   def receive = idle
@@ -76,8 +78,8 @@ class Worker(masterProxy: ActorRef)
   }
 
   def createWorkExecutor(): ActorRef =
-    // in addition to starting the actor we also watch it, so that
-    // if it stops this worker will also be stopped
+  // in addition to starting the actor we also watch it, so that
+  // if it stops this worker will also be stopped
     context.watch(context.actorOf(WorkExecutor.props, "work-executor"))
 
   override def supervisorStrategy = OneForOneStrategy() {
